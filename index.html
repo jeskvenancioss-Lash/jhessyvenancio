@@ -5,36 +5,157 @@
 <title>Jhessy Venancio Lash Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#000;
-color:#D4AF37;
+body{margin:0;font-family:Arial;background:#000;color:#D4AF37;}
+header{background:#111;padding:20px;text-align:center;font-size:22px;font-weight:bold;border-bottom:2px solid #D4AF37;}
+.container{padding:20px;}
+button{width:100%;padding:15px;margin:10px 0;background:#D4AF37;color:black;border:none;border-radius:10px;font-weight:bold;font-size:16px;}
+.card{background:#111;padding:15px;border-radius:10px;margin-top:15px;border:1px solid #D4AF37;display:none;}
+input{width:100%;padding:10px;margin:5px 0;border-radius:5px;border:none;}
+ul{padding-left:0;list-style:none;}
+li{background:#222;margin:5px 0;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.smallbtn{width:auto;padding:5px 10px;font-size:12px;border-radius:5px;}
+</style>
+</head>
+
+<body>
+
+<header>Jhessy Venancio Lash Pro</header>
+
+<div class="container">
+
+<button onclick="show('agenda')">📅 Agenda</button>
+<button onclick="show('anamnese')">📝 Enviar Anamnese</button>
+<button onclick="show('financeiro')">💰 Financeiro</button>
+<button onclick="whatsapp()">📱 WhatsApp</button>
+
+<div id="agenda" class="card">
+<h3>Nova Agenda</h3>
+<input type="text" id="cliente" placeholder="Nome da cliente">
+<input type="number" id="dia" placeholder="Dia" min="1" max="31">
+<input type="number" id="mes" placeholder="Mês" min="1" max="12">
+<input type="time" id="hora">
+<button onclick="salvarAgenda()">Salvar</button>
+<ul id="listaAgenda"></ul>
+</div>
+
+<div id="anamnese" class="card">
+<h3>Link da Anamnese</h3>
+<input type="text" value="https://forms.gle/7DPiMd6V5kwakUM89" id="linkForm">
+<button onclick="copiar()">Copiar Link</button>
+</div>
+
+<div id="financeiro" class="card">
+<h3>Adicionar Valor</h3>
+<input type="number" id="valor" placeholder="Valor recebido">
+<button onclick="salvarValor()">Adicionar</button>
+<h4>Total acumulado: R$ <span id="total">0</span></h4>
+<ul id="listaFinanceiro"></ul>
+</div>
+
+</div>
+
+<script>
+
+function show(id){
+document.querySelectorAll(".card").forEach(c=>c.style.display="none");
+document.getElementById(id).style.display="block";
 }
 
-header{
-background:#111;
-padding:20px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-border-bottom:2px solid #D4AF37;
+/* AGENDA */
+function salvarAgenda(){
+let cliente=document.getElementById("cliente").value;
+let dia=parseInt(document.getElementById("dia").value);
+let mes=parseInt(document.getElementById("mes").value);
+let hora=document.getElementById("hora").value;
+
+if(!cliente||!dia||!mes||!hora)return alert("Preencha tudo");
+
+let agenda=JSON.parse(localStorage.getItem("agenda"))||[];
+agenda.push({cliente,dia,mes,hora});
+localStorage.setItem("agenda",JSON.stringify(agenda));
+renderAgenda();
 }
 
-.container{
-padding:20px;
+function excluirAgenda(index){
+let agenda=JSON.parse(localStorage.getItem("agenda"));
+agenda.splice(index,1);
+localStorage.setItem("agenda",JSON.stringify(agenda));
+renderAgenda();
 }
 
-button{
-width:100%;
-padding:15px;
-margin:10px 0;
-background:#D4AF37;
-color:black;
-border:none;
-border-radius:10px;
-font-weight:bold;
-font-size:16px;
+function renderAgenda(){
+let lista=document.getElementById("listaAgenda");
+lista.innerHTML="";
+let agenda=JSON.parse(localStorage.getItem("agenda"))||[];
+
+agenda.sort((a,b)=>{
+if(a.mes!==b.mes) return a.mes-b.mes;
+if(a.dia!==b.dia) return a.dia-b.dia;
+return a.hora.localeCompare(b.hora);
+});
+
+agenda.forEach((item,index)=>{
+let li=document.createElement("li");
+li.innerHTML=`${item.cliente} - ${item.dia}/${item.mes} às ${item.hora}
+<button class="smallbtn" onclick="excluirAgenda(${index})">X</button>`;
+lista.appendChild(li);
+});
+}
+
+renderAgenda();
+
+/* FINANCEIRO */
+function salvarValor(){
+let valor=parseFloat(document.getElementById("valor").value);
+if(!valor)return;
+let financeiro=JSON.parse(localStorage.getItem("financeiro"))||[];
+financeiro.push(valor);
+localStorage.setItem("financeiro",JSON.stringify(financeiro));
+renderFinanceiro();
+}
+
+function excluirFinanceiro(index){
+let financeiro=JSON.parse(localStorage.getItem("financeiro"));
+financeiro.splice(index,1);
+localStorage.setItem("financeiro",JSON.stringify(financeiro));
+renderFinanceiro();
+}
+
+function renderFinanceiro(){
+let lista=document.getElementById("listaFinanceiro");
+lista.innerHTML="";
+let financeiro=JSON.parse(localStorage.getItem("financeiro"))||[];
+let total=0;
+
+financeiro.forEach((valor,index)=>{
+total+=valor;
+let li=document.createElement("li");
+li.innerHTML=`R$ ${valor.toFixed(2)}
+<button class="smallbtn" onclick="excluirFinanceiro(${index})">X</button>`;
+lista.appendChild(li);
+});
+
+document.getElementById("total").innerText=total.toFixed(2);
+}
+
+renderFinanceiro();
+
+/* OUTROS */
+function copiar(){
+let copyText=document.getElementById("linkForm");
+copyText.select();
+document.execCommand("copy");
+alert("Link copiado!");
+}
+
+function whatsapp(){
+window.open("https://wa.me/5574999141735");
+}
+
+</script>
+
+</body>
+</html>font-size:16px;
 }
 
 .card{
